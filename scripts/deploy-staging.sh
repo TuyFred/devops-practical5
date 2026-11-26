@@ -1,6 +1,4 @@
-
 #!/bin/bash
-
 set -e
 
 echo "Starting deployment to staging..."
@@ -9,7 +7,7 @@ APP_PORT=3001
 PID_FILE="staging.pid"
 LOG_FILE="staging.log"
 
-# Stop the previous staging application, if it is running
+# Stop the previous staging application, if it exists.
 if [ -f "$PID_FILE" ]; then
     OLD_PID=$(cat "$PID_FILE")
 
@@ -21,13 +19,20 @@ if [ -f "$PID_FILE" ]; then
     rm -f "$PID_FILE"
 fi
 
-# Start the application on port 3001
-PORT=$APP_PORT nohup node app.js > "$LOG_FILE" 2>&1 &
-echo $! > "$PID_FILE"
+# Start Node.js as a detached process.
+# These variables prevent Jenkins from killing the application.
+nohup env \
+    JENKINS_NODE_COOKIE=dontKillMe \
+    BUILD_ID=dontKillMe \
+    PORT="$APP_PORT" \
+    node app.js > "$LOG_FILE" 2>&1 &
 
-echo "Waiting for the staging application..."
+APP_PID=$!
+echo "$APP_PID" > "$PID_FILE"
 
-# Check the application health endpoint
+echo "Staging application started with PID: $APP_PID"
+
+# Wait for the application to become healthy.
 for i in {1..15}; do
     if curl -fsS "http://127.0.0.1:$APP_PORT/health"; then
         echo
