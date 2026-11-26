@@ -1,0 +1,23 @@
+
+{
+  "name": "devops-practical5",
+  "version": "1.0.0",
+  "description": "Jenkins CI/CD practical application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node --test",
+    "test:report": "node --test --test-reporter=junit --test-reporter-destination=test-results.xml",
+    "build": "mkdir -p dist && cp app.js dist/app.js",
+    "deploy:staging": "bash scripts/deploy-staging.sh"
+  },
+  "keywords": [
+    "jenkins",
+    "ci-cd",
+    "nodejs",
+    "devops"
+  ],
+  "author": "Fred Tuyishime",
+  "license": "ISC"
+}
+
